@@ -1,12 +1,25 @@
-from fastapi import FastAPI
+import os
+import uuid
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 
-# Création de l'instance principale de l'application
-app = FastAPI(
-    title="Polyglot Social Network API",
-    description="API REST orchestrant MongoDB et Neo4j",
-    version="1.0.0"
+from databases import lifespan, db_state
+from repositories.mongo_repo import MongoRepository
+from repositories.neo4j_repo import Neo4jRepository
+
+app = FastAPI(title="Neo4Link Polyglot API", lifespan=lifespan)
+
+# Récupération des origines autorisées (Vite dev + Docker frontend)
+allowed_origins = os.getenv(
+    "CORS_ORIGINS",
+    "http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000,http://localhost"
+).split(",")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=allowed_origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
-
-@app.get("/")
-async def health_check():
-    return {"status": "online", "databases": ["MongoDB", "Neo4j"]}
