@@ -1,19 +1,20 @@
 import os
-import uuid
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
 
-from databases import lifespan, db_state
-from repositories.mongo_repo import MongoRepository
-from repositories.neo4j_repo import Neo4jRepository
+from databases import lifespan
+from routers import auth, users, posts
 
-app = FastAPI(title="Neo4Link Polyglot API", lifespan=lifespan)
+app = FastAPI(
+    title="Neo4Link Polyglot API",
+    description="API REST orchestrant MongoDB et Neo4j",
+    lifespan=lifespan,
+)
 
-# Récupération des origines autorisées (Vite dev + Docker frontend)
+# Configuration CORS
 allowed_origins = os.getenv(
     "CORS_ORIGINS",
-    "http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000,http://localhost"
+    "http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000,http://localhost",
 ).split(",")
 
 app.add_middleware(
@@ -23,3 +24,13 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Enregistrement des modules de routes
+app.include_router(auth.router)
+app.include_router(users.router)
+app.include_router(posts.router)
+
+
+@app.get("/", tags=["Santé"])
+async def health_check():
+    return {"status": "online", "architecture": "MongoDB + Neo4j"}
