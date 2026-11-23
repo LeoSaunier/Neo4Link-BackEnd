@@ -1,13 +1,19 @@
 FROM python:3.11-slim
 
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
 WORKDIR /app
 
-# Copie des dépendances depuis la racine
+# Installation des dépendances depuis la racine
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copie du contenu du dossier backend/ directement dans /app
-COPY ./backend /app
+# Copie du code du dossier backend dans /app/backend
+COPY ./backend /app/backend
+
+# On se place dans /app/backend pour préserver la résolution des imports locaux
+WORKDIR /app/backend
 
 EXPOSE 8000
 
