@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from databases import lifespan
-from routers import auth, users, posts
+from routers import auth
 
 app = FastAPI(
     title="Neo4Link Polyglot API",
@@ -27,8 +27,6 @@ app.add_middleware(
 
 # Enregistrement des modules de routes
 app.include_router(auth.router)
-app.include_router(users.router)
-app.include_router(posts.router)
 
 
 @app.get("/", tags=["Santé"])
